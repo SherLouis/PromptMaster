@@ -158,8 +158,14 @@ export default function App() {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-[#020617] text-slate-200 overflow-hidden font-sans">
-            <header className="px-6 py-4 flex items-center justify-between border-b border-white/5 bg-slate-900/50 backdrop-blur-xl z-20">
+        <div className="flex flex-col h-screen bg-[#020617] text-slate-200 overflow-hidden font-sans relative selection:bg-indigo-500/30 selection:text-indigo-200">
+            {/* Background Gradients */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px]" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px]" />
+            </div>
+
+            <header className="px-6 py-5 flex items-center justify-between z-20 relative">
                 <div className="flex items-center gap-3">
                     {view !== 'goals' && (
                         <button
@@ -199,39 +205,42 @@ export default function App() {
                             exit="exit"
                             className="flex flex-col h-full"
                         >
-                            <div className="space-y-1 mb-6 flex-shrink-0">
-                                <h2 className="text-2xl font-bold text-white tracking-tight">What's your goal?</h2>
-                                <p className="text-slate-400 text-sm">Choose a category to get started.</p>
-                            </div>
+                            <div className="flex-1 flex flex-col justify-center">
+                                <div className="space-y-2 mb-8 text-center">
+                                    <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 tracking-tight">Pick a Goal</h2>
+                                    <p className="text-slate-400 text-sm font-medium">What do you want to create today?</p>
+                                </div>
 
-                            <div className="grid grid-cols-3 gap-3 mb-4 w-full">
-                                {GOALS.map((goal) => (
-                                    <button
-                                        key={goal.label}
-                                        onClick={() => {
-                                            setSelectedGoal(goal.label);
-                                            setView('list');
-                                        }}
-                                        className="group relative flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-800/40 border border-white/5 hover:bg-slate-700/60 hover:border-indigo-500/30 transition-all duration-300 aspect-square"
-                                    >
-                                        <div
-                                            className="w-10 h-10 rounded-xl mb-2 flex items-center justify-center transition-transform group-hover:scale-110 duration-300"
-                                            style={{ backgroundColor: `${goal.color}15`, color: goal.color }}
+                                <div className="grid grid-cols-2 gap-3 mb-6 w-full">
+                                    {GOALS.map((goal) => (
+                                        <button
+                                            key={goal.label}
+                                            onClick={() => {
+                                                setSelectedGoal(goal.label);
+                                                setView('list');
+                                            }}
+                                            className="group relative flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-800/30 border border-white/5 hover:bg-slate-800/60 hover:border-indigo-500/30 transition-all duration-300 h-28 hover:shadow-lg hover:shadow-indigo-500/10"
                                         >
-                                            <goal.icon size={22} strokeWidth={1.5} />
-                                        </div>
-                                        <span className="text-xs font-semibold text-slate-100 group-hover:text-white transition-colors tracking-wide">{goal.label}</span>
-                                    </button>
-                                ))}
-                            </div>
+                                            <div
+                                                className="w-10 h-10 rounded-xl mb-3 flex items-center justify-center transition-transform group-hover:scale-110 duration-300 bg-slate-900/50 group-hover:bg-transparent"
+                                                style={{ color: goal.color, boxShadow: `0 0 20px -5px ${goal.color}30` }}
+                                            >
+                                                <goal.icon size={20} strokeWidth={2} />
+                                            </div>
+                                            <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">{goal.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
 
-                            <button
-                                onClick={handleCreateNew}
-                                className="w-full p-4 mt-auto rounded-xl bg-slate-800/50 hover:bg-slate-800 border-2 border-dashed border-slate-700 hover:border-indigo-500/50 hover:text-indigo-400 text-slate-400 transition-all flex items-center justify-center gap-2 group flex-shrink-0"
-                            >
-                                <Plus size={18} className="group-hover:scale-110 transition-transform" />
-                                <span className="font-medium text-sm">Create from scratch</span>
-                            </button>
+                                <button
+                                    onClick={handleCreateNew}
+                                    className="w-full p-4 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/20 hover:border-indigo-500/40 text-indigo-300 hover:text-indigo-200 transition-all flex items-center justify-center gap-2 group relative overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
+                                    <PlusCircle size={18} className="group-hover:scale-110 transition-transform" />
+                                    <span className="font-semibold text-sm">Create Blank Template</span>
+                                </button>
+                            </div>
                         </motion.div>
                     )}
 
@@ -330,52 +339,31 @@ export default function App() {
                                         <p className="text-xs text-slate-500 truncate">{activeTemplate.description}</p>
                                     )}
                                 </div>
-                                <div className="flex gap-2 shrink-0">
+                                <div className="flex gap-2 shrink-0 items-start">
                                     <button
                                         onClick={() => setIsDesignMode(!isDesignMode)}
-                                        className={`p-2 rounded-lg border transition-all ${isDesignMode ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400' : 'bg-slate-800 border-slate-700 text-slate-400'}`}
-                                        title={isDesignMode ? "Preview Mode" : "Design Mode"}
+                                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-2 ${isDesignMode
+                                            ? 'bg-indigo-500 text-white border-indigo-500 shadow-lg shadow-indigo-500/25'
+                                            : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'
+                                            }`}
                                     >
-                                        {isDesignMode ? <Eye size={18} /> : <Settings size={18} />}
+                                        <Settings size={14} className={isDesignMode ? "animate-spin-slow" : ""} />
+                                        <span>Editor</span>
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 {activeTemplate.sections.map((section, idx) => (
-                                    <div key={section.id} className={`group relative transition-all ${isDesignMode ? 'p-4 rounded-xl border border-dashed border-slate-700 bg-slate-900/50 hover:border-slate-600' : ''}`}>
+                                    <div key={section.id} className="relative group animate-in slide-in-from-bottom-2 duration-300">
 
-                                        {/* Design Mode Controls */}
+                                        {/* Design Mode Header for Section */}
                                         {isDesignMode && (
-                                            <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/5">
+                                            <div className="flex items-center justify-between mb-2">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">#{idx + 1}</span>
-                                                    <div className="flex bg-slate-950/50 p-1 rounded-lg border border-white/5">
-                                                        <button
-                                                            onClick={() => {
-                                                                const newSections = [...activeTemplate.sections];
-                                                                newSections[idx].type = 'text';
-                                                                setActiveTemplate({ ...activeTemplate, sections: newSections });
-                                                            }}
-                                                            className={`p-1.5 rounded-md transition-all flex items-center gap-1.5 ${section.type === 'text' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}`}
-                                                            title="Static Text (Instructions for AI)"
-                                                        >
-                                                            <AlignLeft size={14} />
-                                                            <span className="text-[10px] font-semibold pr-1">Static</span>
-                                                        </button>
-                                                        <button
-                                                            onClick={() => {
-                                                                const newSections = [...activeTemplate.sections];
-                                                                newSections[idx].type = 'input';
-                                                                setActiveTemplate({ ...activeTemplate, sections: newSections });
-                                                            }}
-                                                            className={`p-1.5 rounded-md transition-all flex items-center gap-1.5 ${section.type === 'input' ? 'bg-pink-600 text-white shadow-lg shadow-pink-500/20' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}`}
-                                                            title="User Input (Variable)"
-                                                        >
-                                                            <Type size={14} />
-                                                            <span className="text-[10px] font-semibold pr-1">Input</span>
-                                                        </button>
-                                                    </div>
+                                                    <span className="text-[10px] bg-slate-800/50 text-slate-500 px-1.5 py-0.5 rounded font-mono border border-white/5">
+                                                        {idx + 1}
+                                                    </span>
                                                     <input
                                                         value={section.label}
                                                         onChange={(e) => {
@@ -383,51 +371,76 @@ export default function App() {
                                                             newSections[idx].label = e.target.value;
                                                             setActiveTemplate({ ...activeTemplate, sections: newSections });
                                                         }}
-                                                        className="bg-transparent border-none text-xs font-semibold text-slate-300 focus:outline-none focus:text-white transition-colors"
+                                                        className="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 px-0 py-0.5 text-xs font-bold text-slate-300 focus:outline-none focus:text-white transition-all w-32 placeholder-slate-600"
                                                         placeholder="Label..."
                                                     />
                                                 </div>
-                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={() => moveSection(idx, 'up')} disabled={idx === 0} className="p-1.5 hover:bg-white/5 rounded text-slate-500 disabled:opacity-30"><MoveUp size={14} /></button>
-                                                    <button onClick={() => moveSection(idx, 'down')} disabled={idx === activeTemplate.sections.length - 1} className="p-1.5 hover:bg-white/5 rounded text-slate-500 disabled:opacity-30"><MoveDown size={14} /></button>
-                                                    <div className="w-px h-3 bg-white/10 mx-1" />
-                                                    <button onClick={() => deleteSection(idx)} className="p-1.5 hover:bg-red-500/20 text-slate-500 hover:text-red-400 rounded transition-colors"><X size={14} /></button>
+
+                                                <div className="flex items-center gap-1">
+                                                    <div className="flex bg-slate-900/50 rounded-lg p-0.5 border border-white/5 mr-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                const newSections = [...activeTemplate.sections];
+                                                                newSections[idx].type = 'text';
+                                                                setActiveTemplate({ ...activeTemplate, sections: newSections });
+                                                            }}
+                                                            className={`p-1 rounded-md transition-all ${section.type === 'text' ? 'bg-indigo-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
+                                                            title="Static Text"
+                                                        >
+                                                            <AlignLeft size={12} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                const newSections = [...activeTemplate.sections];
+                                                                newSections[idx].type = 'input';
+                                                                setActiveTemplate({ ...activeTemplate, sections: newSections });
+                                                            }}
+                                                            className={`p-1 rounded-md transition-all ${section.type === 'input' ? 'bg-indigo-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
+                                                            title="User Input"
+                                                        >
+                                                            <Type size={12} />
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="flex opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+                                                        <button onClick={() => moveSection(idx, 'up')} disabled={idx === 0} className="p-1 hover:bg-white/10 rounded text-slate-500 disabled:opacity-30"><MoveUp size={12} /></button>
+                                                        <button onClick={() => moveSection(idx, 'down')} disabled={idx === activeTemplate.sections.length - 1} className="p-1 hover:bg-white/10 rounded text-slate-500 disabled:opacity-30"><MoveDown size={12} /></button>
+                                                        <button onClick={() => deleteSection(idx)} className="p-1 hover:bg-red-500/20 text-slate-500 hover:text-red-400 rounded transition-colors"><X size={12} /></button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
 
-                                        {/* Use Mode / Content Editor */}
-                                        <div className="space-y-3">
+                                        {/* Content Area */}
+                                        <div className={`relative transition-all rounded-xl overflow-hidden ${isDesignMode ? 'p-1' : ''}`}>
                                             {!isDesignMode && (
                                                 <div className="flex items-center gap-2 mb-2">
-                                                    <div className={`w-1.5 h-1.5 rounded-full ${section.type === 'text' ? 'bg-indigo-400' : 'bg-pink-400'}`} />
-                                                    <label className="text-sm font-semibold text-slate-200 tracking-tight">
+                                                    <div className={`w-1 h-4 rounded-full ${section.type === 'text' ? 'bg-indigo-500' : 'bg-purple-500'}`} />
+                                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                                                         {section.label}
                                                     </label>
                                                 </div>
                                             )}
 
-                                            {/* Logic for rendering based on Type and Mode */}
                                             {section.type === 'text' ? (
                                                 <div className="relative group/input">
                                                     <textarea
-                                                        className={`w-full bg-slate-950/30 rounded-2xl p-4 text-sm text-slate-300 border border-white/5 focus:outline-none resize-none field-sizing-content leading-relaxed code-font transition-all ${!isDesignMode ? 'read-only:cursor-text hover:bg-slate-950/50 hover:border-white/10' : 'focus:border-indigo-500/50'}`}
+                                                        className={`w-full bg-slate-900/40 rounded-xl p-4 text-sm text-slate-200 border border-white/5 focus:outline-none resize-none field-sizing-content leading-relaxed transition-all ${!isDesignMode ? 'read-only:cursor-text hover:bg-slate-900/60' : 'focus:border-indigo-500/50 bg-slate-900/20 border-dashed border-slate-700'}`}
                                                         value={section.value}
                                                         onChange={(e) => {
                                                             const newSections = [...activeTemplate.sections];
                                                             newSections[idx].value = e.target.value;
                                                             setActiveTemplate({ ...activeTemplate, sections: newSections });
                                                         }}
-                                                        placeholder="Enter instructions for the AI..."
+                                                        placeholder="Enter static context for the AI..."
                                                         rows={Math.max(3, section.value.split('\n').length)}
                                                     />
-                                                    {!isDesignMode && <div className="absolute right-3 top-3 pointer-events-none opacity-50"><Sparkles size={14} className="text-indigo-400" /></div>}
                                                 </div>
                                             ) : (
                                                 <div className="relative group/input">
                                                     <textarea
-                                                        className={`modern-input min-h-[50px] text-sm resize-none ${isDesignMode ? 'border-dashed border-pink-500/30 bg-pink-500/5' : 'bg-slate-800/50 hover:bg-slate-800/80 focus:bg-slate-800'}`}
-                                                        placeholder={isDesignMode ? "Example value (optional)..." : section.placeholder || "Type here..."}
+                                                        className={`modern-input min-h-[50px] text-sm resize-none ${isDesignMode ? 'border-dashed border-purple-500/30 bg-purple-500/5 focus:border-purple-500/50' : 'bg-slate-800/30 hover:bg-slate-800/50'}`}
+                                                        placeholder={isDesignMode ? "Example placeholder text..." : section.placeholder || "Enter value..."}
                                                         value={section.value}
                                                         onChange={(e) => {
                                                             const newSections = [...activeTemplate.sections];
@@ -435,7 +448,6 @@ export default function App() {
                                                             setActiveTemplate({ ...activeTemplate, sections: newSections });
                                                         }}
                                                     />
-                                                    {isDesignMode && <div className="absolute right-3 bottom-3 text-[10px] text-pink-400/70 font-bold tracking-wider">VARIABLE</div>}
                                                 </div>
                                             )}
                                         </div>
