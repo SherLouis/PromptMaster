@@ -322,7 +322,7 @@ export default function App() {
                                     <div className="flex-1 min-w-0 pr-2">
                                         {isDesignMode ? (
                                             <input
-                                                className="bg-transparent text-2xl font-bold text-white w-full border-none focus:outline-none focus:ring-0 p-0 placeholder-slate-600 focus:placeholder-slate-700 transition-colors leading-tight"
+                                                className="bg-slate-800/50 text-2xl font-bold text-white w-full border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500/50 focus:bg-slate-800 placeholder-slate-600 focus:placeholder-slate-700 transition-all leading-tight mb-1"
                                                 value={activeTemplate.title}
                                                 onChange={(e) => setActiveTemplate({ ...activeTemplate, title: e.target.value })}
                                                 placeholder="Template Title"
@@ -348,7 +348,7 @@ export default function App() {
                                 <div className="min-w-0">
                                     {isDesignMode ? (
                                         <input
-                                            className="bg-transparent text-sm text-slate-500 w-full border-none focus:outline-none focus:ring-0 p-0 placeholder-slate-700 font-medium"
+                                            className="bg-slate-800/50 text-sm text-slate-300 w-full border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500/50 focus:bg-slate-800 placeholder-slate-600 font-medium transition-all"
                                             value={activeTemplate.description}
                                             onChange={(e) => setActiveTemplate({ ...activeTemplate, description: e.target.value })}
                                             placeholder="Describe what this template does..."
@@ -364,11 +364,12 @@ export default function App() {
                                     <div key={section.id} className="relative group animate-in slide-in-from-bottom-2 duration-300">
 
                                         {/* Design Mode Header for Section */}
+                                        {/* Design Mode Header for Section */}
                                         {isDesignMode && (
-                                            <div className="glass-card p-4 mb-3 border-slate-700/50">
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <div className="flex items-center gap-3 flex-1">
-                                                        <span className="text-xs font-mono text-slate-500 bg-slate-900 px-2 py-1 rounded">#{idx + 1}</span>
+                                            <div className="glass-card p-5 mb-4 border-slate-700/50 shadow-xl shadow-black/20">
+                                                <div className="flex items-center justify-between mb-5">
+                                                    <div className="flex items-center gap-3 flex-1 min-w-0 mr-4">
+                                                        <span className="text-xs font-mono text-slate-500 bg-slate-900 border border-white/5 px-2.5 py-1.5 rounded-md shrink-0">#{idx + 1}</span>
                                                         <input
                                                             value={section.label}
                                                             onChange={(e) => {
@@ -376,27 +377,27 @@ export default function App() {
                                                                 newSections[idx].label = e.target.value;
                                                                 setActiveTemplate({ ...activeTemplate, sections: newSections });
                                                             }}
-                                                            className="bg-transparent border-b border-slate-700 focus:border-indigo-500 px-0 py-1 text-base font-bold text-white focus:outline-none transition-all w-full placeholder-slate-600"
-                                                            placeholder="Section Label (e.g. 'Topic')"
+                                                            className="bg-slate-900/50 border border-white/10 focus:border-indigo-500/50 rounded-lg px-3 py-2 text-base font-bold text-white focus:outline-none transition-all w-full placeholder-slate-600 min-w-0"
+                                                            placeholder="Section Label"
                                                         />
                                                     </div>
-                                                    <div className="flex items-center gap-1 ml-2">
-                                                        <button onClick={() => moveSection(idx, 'up')} disabled={idx === 0} className="p-2 hover:bg-white/10 rounded-lg text-slate-400 disabled:opacity-30"><MoveUp size={16} /></button>
-                                                        <button onClick={() => moveSection(idx, 'down')} disabled={idx === activeTemplate.sections.length - 1} className="p-2 hover:bg-white/10 rounded-lg text-slate-400 disabled:opacity-30"><MoveDown size={16} /></button>
-                                                        <div className="w-px h-4 bg-white/10 mx-2" />
-                                                        <button onClick={() => deleteSection(idx)} className="p-2 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-lg transition-colors"><Trash2 size={16} /></button>
+                                                    <div className="flex items-center gap-1.5 bg-slate-900/50 p-1 rounded-xl border border-white/5 shrink-0">
+                                                        <button onClick={() => moveSection(idx, 'up')} disabled={idx === 0} className="p-2.5 hover:bg-white/10 rounded-lg text-slate-400 disabled:opacity-30 transition-colors"><MoveUp size={16} /></button>
+                                                        <button onClick={() => moveSection(idx, 'down')} disabled={idx === activeTemplate.sections.length - 1} className="p-2.5 hover:bg-white/10 rounded-lg text-slate-400 disabled:opacity-30 transition-colors"><MoveDown size={16} /></button>
+                                                        <div className="w-px h-5 bg-white/10 mx-1" />
+                                                        <button onClick={() => deleteSection(idx)} className="p-2.5 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-lg transition-colors"><Trash2 size={16} /></button>
                                                     </div>
                                                 </div>
 
-                                                <div className="space-y-3">
-                                                    <div className="flex bg-slate-900/80 p-1 rounded-xl border border-white/5 w-fit">
+                                                <div className="space-y-4">
+                                                    <div className="flex bg-slate-900/80 p-1.5 rounded-xl border border-white/5 w-full">
                                                         <button
                                                             onClick={() => {
                                                                 const newSections = [...activeTemplate.sections];
                                                                 newSections[idx].type = 'text';
                                                                 setActiveTemplate({ ...activeTemplate, sections: newSections });
                                                             }}
-                                                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${section.type === 'text' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-slate-200'}`}
+                                                            className={`flex-1 px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${section.type === 'text' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
                                                         >
                                                             <AlignLeft size={16} />
                                                             Static Text
@@ -407,7 +408,7 @@ export default function App() {
                                                                 newSections[idx].type = 'input';
                                                                 setActiveTemplate({ ...activeTemplate, sections: newSections });
                                                             }}
-                                                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${section.type === 'input' ? 'bg-pink-600 text-white shadow-lg shadow-pink-500/20' : 'text-slate-400 hover:text-slate-200'}`}
+                                                            className={`flex-1 px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${section.type === 'input' ? 'bg-pink-600 text-white shadow-lg shadow-pink-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
                                                         >
                                                             <Type size={16} />
                                                             User Input
