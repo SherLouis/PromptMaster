@@ -24,7 +24,9 @@ import {
     MoveDown,
     X,
     Type,
-    AlignLeft
+    AlignLeft,
+    List,
+    ChevronDown
 } from 'lucide-react';
 import { PromptTemplate, Goal } from './types';
 import { storage } from './storage';
@@ -91,12 +93,23 @@ export default function App() {
 
     const handleCopy = () => {
         if (!activeTemplate) return;
-        if (!activeTemplate) return;
-        const prompt = activeTemplate.sections
-            .map(s => s.value)
-            .join('\n\n');
 
-        navigator.clipboard.writeText(prompt);
+        let prompt = '';
+        const sections = activeTemplate.sections;
+
+        for (let i = 0; i < sections.length; i++) {
+            prompt += sections[i].value;
+            if (i < sections.length - 1) {
+                // If the current section is text and acts as a label (ends with a colon)
+                if (sections[i].type === 'text' && sections[i].value.trim().endsWith(':')) {
+                    prompt += '\n'; // Use a single newline for neatness
+                } else {
+                    prompt += '\n\n';
+                }
+            }
+        }
+
+        navigator.clipboard.writeText(prompt.trim());
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -161,15 +174,30 @@ export default function App() {
         <div className="flex flex-col h-screen bg-[#020617] text-slate-200 overflow-hidden font-sans relative selection:bg-indigo-500/30 selection:text-indigo-200">
             {/* Background Gradients */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px]" />
-                <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px]" />
+                <motion.div
+                    animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[100px]"
+                />
+                <motion.div
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.7, 0.5] }}
+                    transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+                    className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[100px]"
+                />
             </div>
 
             <header className="!pt-8 !pb-3 flex items-center justify-between z-20 relative shrink-0 w-full box-border" style={{ paddingLeft: '32px', paddingRight: '32px' }}>
                 <div className="flex items-center gap-4">
                     {view !== 'goals' && (
                         <button
-                            onClick={() => setView(view === 'editor' ? 'list' : 'goals')}
+                            onClick={() => {
+                                if (view === 'editor') {
+                                    setView('list');
+                                } else {
+                                    setView('goals');
+                                    setSearch('');
+                                }
+                            }}
                             className="!p-2 hover:bg-slate-800/80 rounded-sm transition-all border border-white/5 group bg-slate-900/50 backdrop-blur-sm"
                         >
                             <ChevronLeft size={22} className="text-slate-400 group-hover:text-white transition-colors" />
@@ -206,9 +234,26 @@ export default function App() {
                             className="flex flex-col h-full"
                         >
                             <div className="flex-1 flex flex-col justify-center">
-                                <div className="space-y-2 mb-8 text-center">
+                                <div className="space-y-2 mb-6 text-center">
                                     <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 tracking-tight">Pick a Goal</h2>
                                     <p className="text-slate-400 text-sm font-medium">What do you want to create today?</p>
+                                </div>
+
+                                <div className="relative group mb-6">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search all templates..."
+                                        className="modern-input !pl-12 !py-4"
+                                        value={search}
+                                        onChange={(e) => {
+                                            setSearch(e.target.value);
+                                            if (e.target.value) {
+                                                setSelectedGoal(null);
+                                                setView('list');
+                                            }
+                                        }}
+                                    />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3 mb-6 w-full">
@@ -219,10 +264,10 @@ export default function App() {
                                                 setSelectedGoal(goal.label);
                                                 setView('list');
                                             }}
-                                            className="group relative flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-800/30 border border-white/5 hover:bg-slate-800/60 hover:border-indigo-500/30 transition-all duration-300 h-28 hover:shadow-lg hover:shadow-indigo-500/10"
+                                            className="goal-button group relative"
                                         >
                                             <div
-                                                className="w-10 h-10 rounded-xl mb-3 flex items-center justify-center transition-transform group-hover:scale-110 duration-300 bg-slate-900/50 group-hover:bg-transparent"
+                                                className="w-12 h-12 rounded-xl mb-3 flex items-center justify-center transition-transform group-hover:scale-110 duration-300 bg-slate-900/50 group-hover:bg-transparent"
                                                 style={{ color: goal.color, boxShadow: `0 0 20px -5px ${goal.color}30` }}
                                             >
                                                 <goal.icon size={20} strokeWidth={2} />
@@ -234,7 +279,7 @@ export default function App() {
 
                                 <button
                                     onClick={handleCreateNew}
-                                    className="w-full p-4 rounded-lg bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/20 hover:border-indigo-500/40 text-indigo-300 hover:text-indigo-200 transition-all flex items-center justify-center gap-2 group relative overflow-hidden"
+                                    className="w-full p-4 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/30 hover:border-indigo-400/50 text-indigo-300 hover:text-indigo-100 transition-all flex items-center justify-center gap-2 group relative overflow-hidden shadow-lg shadow-indigo-500/5"
                                 >
                                     <div className="absolute inset-0 bg-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
                                     <PlusCircle size={18} className="group-hover:scale-110 transition-transform" />
@@ -257,7 +302,7 @@ export default function App() {
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
                                 <input
                                     type="text"
-                                    placeholder={`Search ${selectedGoal}...`}
+                                    placeholder={selectedGoal ? `Search ${selectedGoal}...` : "Search all templates..."}
                                     className="modern-input !pl-12 !py-4"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
@@ -269,37 +314,39 @@ export default function App() {
                                     const goalInfo = GOALS.find(g => g.label === template.goal);
                                     const Icon = goalInfo?.icon || Layout;
                                     return (
-                                        <div
+                                        <motion.div
                                             key={template.id}
+                                            whileHover={{ scale: 1.02, y: -2 }}
+                                            whileTap={{ scale: 0.98 }}
                                             onClick={() => handleSelectTemplate(template)}
                                             className="template-card cursor-pointer group"
                                         >
-                                            <div className="w-12 h-12 rounded-2xl bg-slate-800/80 flex items-center justify-center shrink-0 border border-white/5 transition-all group-hover:bg-slate-700/80" style={{ color: goalInfo?.color }}>
-                                                <Icon size={24} />
+                                            <div className="w-14 h-14 rounded-2xl bg-slate-800/80 flex items-center justify-center shrink-0 border border-white/5 transition-all group-hover:bg-slate-700/80" style={{ color: goalInfo?.color, boxShadow: `0 0 15px -5px ${goalInfo?.color}40` }}>
+                                                <Icon size={26} />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex justify-between items-start">
-                                                    <h3 className="font-bold text-white group-hover:text-indigo-400 transition-colors truncate pr-2 text-sm">
+                                                    <h3 className="font-bold text-white group-hover:text-indigo-400 transition-colors truncate pr-2 text-base">
                                                         {template.title}
                                                     </h3>
                                                 </div>
-                                                <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5 font-medium leading-relaxed">
+                                                <p className="text-xs text-slate-400 line-clamp-1 mt-1.5 font-medium leading-relaxed">
                                                     {template.description}
                                                 </p>
                                             </div>
                                             {template.isCustom ? (
                                                 <button
                                                     onClick={(e) => handleDeleteTemplate(template.id, e)}
-                                                    className="p-2 text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                                                    className="p-2.5 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <Trash2 size={18} />
                                                 </button>
                                             ) : (
-                                                <div className="p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <Layout size={16} className="text-slate-600" />
+                                                <div className="p-2.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Layout size={18} className="text-slate-600" />
                                                 </div>
                                             )}
-                                        </div>
+                                        </motion.div>
                                     );
                                 })}
                             </div>
@@ -397,7 +444,7 @@ export default function App() {
                                                                 newSections[idx].type = 'text';
                                                                 setActiveTemplate({ ...activeTemplate, sections: newSections });
                                                             }}
-                                                            className={`flex-1 px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${section.type === 'text' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
+                                                            className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${section.type === 'text' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
                                                         >
                                                             <AlignLeft size={16} />
                                                             Static Text
@@ -408,10 +455,25 @@ export default function App() {
                                                                 newSections[idx].type = 'input';
                                                                 setActiveTemplate({ ...activeTemplate, sections: newSections });
                                                             }}
-                                                            className={`flex-1 px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${section.type === 'input' ? 'bg-pink-600 text-white shadow-lg shadow-pink-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
+                                                            className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${section.type === 'input' ? 'bg-pink-600 text-white shadow-lg shadow-pink-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
                                                         >
                                                             <Type size={16} />
                                                             User Input
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                const newSections = [...activeTemplate.sections];
+                                                                newSections[idx].type = 'select';
+                                                                if (!newSections[idx].options) {
+                                                                    newSections[idx].options = ['Option 1', 'Option 2', 'Option 3'];
+                                                                    newSections[idx].value = 'Option 1';
+                                                                }
+                                                                setActiveTemplate({ ...activeTemplate, sections: newSections });
+                                                            }}
+                                                            className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${section.type === 'select' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
+                                                        >
+                                                            <List size={16} />
+                                                            Dropdown
                                                         </button>
                                                     </div>
 
@@ -426,7 +488,7 @@ export default function App() {
                                                             }}
                                                             placeholder="Write the instructions for the AI here..."
                                                         />
-                                                    ) : (
+                                                    ) : section.type === 'input' ? (
                                                         <div className="relative">
                                                             <input
                                                                 className="w-full bg-slate-900/50 rounded-xl px-4 py-3 text-sm text-slate-300 border border-white/5 focus:outline-none focus:border-pink-500/50"
@@ -440,6 +502,60 @@ export default function App() {
                                                             />
                                                             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold tracking-wider">PLACEHOLDER</div>
                                                         </div>
+                                                    ) : (
+                                                        <div className="space-y-3">
+                                                            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Dropdown Options</div>
+                                                            {(section.options || []).map((opt, optIdx) => (
+                                                                <div key={optIdx} className="flex gap-2 items-center w-full">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50 shrink-0" />
+                                                                    <input
+                                                                        type="text"
+                                                                        className="flex-1 bg-slate-900/50 rounded-lg px-3 py-2 text-sm text-slate-300 border border-white/5 focus:outline-none focus:border-emerald-500/50"
+                                                                        value={opt}
+                                                                        placeholder={`Option ${optIdx + 1}`}
+                                                                        onChange={(e) => {
+                                                                            const newSections = [...activeTemplate.sections];
+                                                                            if (!newSections[idx].options) newSections[idx].options = [];
+                                                                            newSections[idx].options[optIdx] = e.target.value;
+                                                                            if (newSections[idx].value === opt) {
+                                                                                newSections[idx].value = e.target.value;
+                                                                            }
+                                                                            setActiveTemplate({ ...activeTemplate, sections: newSections });
+                                                                        }}
+                                                                    />
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const newSections = [...activeTemplate.sections];
+                                                                            if (newSections[idx].options && newSections[idx].options.length > 1) {
+                                                                                const newOptions = [...newSections[idx].options];
+                                                                                const removed = newOptions.splice(optIdx, 1)[0];
+                                                                                newSections[idx].options = newOptions;
+                                                                                if (newSections[idx].value === removed) {
+                                                                                    newSections[idx].value = newOptions[0];
+                                                                                }
+                                                                                setActiveTemplate({ ...activeTemplate, sections: newSections });
+                                                                            }
+                                                                        }}
+                                                                        className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors shrink-0 disabled:opacity-30 disabled:hover:bg-transparent"
+                                                                        disabled={section.options?.length === 1}
+                                                                    >
+                                                                        <X size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            ))}
+                                                            <button
+                                                                onClick={() => {
+                                                                    const newSections = [...activeTemplate.sections];
+                                                                    if (!newSections[idx].options) newSections[idx].options = [];
+                                                                    newSections[idx].options.push(`New Option`);
+                                                                    setActiveTemplate({ ...activeTemplate, sections: newSections });
+                                                                }}
+                                                                className="text-xs font-bold text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5 py-1.5 mt-2 ml-3.5"
+                                                            >
+                                                                <Plus size={14} strokeWidth={3} />
+                                                                Add Option
+                                                            </button>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
@@ -449,7 +565,7 @@ export default function App() {
                                         {!isDesignMode && (
                                             <div className="relative transition-all rounded-xl overflow-hidden mb-6">
                                                 <div className="flex items-center gap-3 mb-3">
-                                                    <div className={`w-1.5 h-6 rounded-full ${section.type === 'text' ? 'bg-indigo-500' : 'bg-pink-500'}`} />
+                                                    <div className={`w-1.5 h-6 rounded-full ${section.type === 'text' ? 'bg-indigo-500' : section.type === 'select' ? 'bg-emerald-500' : 'bg-pink-500'}`} />
                                                     <label className="text-sm font-bold text-slate-200 tracking-wide">
                                                         {section.label}
                                                     </label>
@@ -464,7 +580,7 @@ export default function App() {
                                                             {section.value}
                                                         </div>
                                                     </div>
-                                                ) : (
+                                                ) : section.type === 'input' ? (
                                                     <div className="relative group/input">
                                                         <textarea
                                                             className="modern-input min-h-[120px] text-base resize-none bg-slate-800/50 hover:bg-slate-800/80 focus:bg-slate-800 border-slate-700/50 focus:border-pink-500/50 transition-all placeholder:text-slate-600"
@@ -480,6 +596,25 @@ export default function App() {
                                                             <PenTool size={14} className="text-pink-500/50" />
                                                         </div>
                                                     </div>
+                                                ) : (
+                                                    <div className="relative group/input">
+                                                        <select
+                                                            className="modern-input appearance-none text-base bg-slate-800/50 hover:bg-slate-800/80 focus:bg-slate-800 border-slate-700/50 focus:border-emerald-500/50 transition-all cursor-pointer font-medium"
+                                                            value={section.value}
+                                                            onChange={(e) => {
+                                                                const newSections = [...activeTemplate.sections];
+                                                                newSections[idx].value = e.target.value;
+                                                                setActiveTemplate({ ...activeTemplate, sections: newSections });
+                                                            }}
+                                                        >
+                                                            {(section.options || []).map((opt, optIdx) => (
+                                                                <option key={optIdx} value={opt} className="bg-slate-900 border-0">{opt}</option>
+                                                            ))}
+                                                        </select>
+                                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within/input:text-emerald-500 transition-colors">
+                                                            <ChevronDown size={18} />
+                                                        </div>
+                                                    </div>
                                                 )}
                                             </div>
                                         )}
@@ -489,7 +624,7 @@ export default function App() {
                                 {isDesignMode && (
                                     <button
                                         onClick={addSection}
-                                        className="w-full py-4 border border-dashed border-slate-700 hover:border-indigo-500/50 hover:bg-slate-800/30 rounded-xl text-slate-400 font-semibold transition-all flex items-center justify-center gap-2 group"
+                                        className="w-full py-4 border border-dashed border-slate-700 hover:border-indigo-500/50 hover:bg-slate-800/30 rounded-xl text-slate-400 font-semibold transition-all flex items-center justify-center gap-2 group mb-6"
                                     >
                                         <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
                                             <Plus size={18} className="text-indigo-400" />
@@ -498,6 +633,9 @@ export default function App() {
                                     </button>
                                 )}
                             </div>
+
+                            {/* Additional padding element to push content past the fixed footer */}
+                            <div className="h-32 w-full shrink-0"></div>
 
                             <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#020617] via-[#020617] to-transparent z-30 flex gap-3">
                                 {isDesignMode ? (

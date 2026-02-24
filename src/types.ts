@@ -1,4 +1,4 @@
-export type SectionType = 'text' | 'input';
+export type SectionType = 'text' | 'input' | 'select';
 
 export interface PromptSection {
     id: string;
@@ -6,6 +6,7 @@ export interface PromptSection {
     label: string;
     value: string;
     placeholder: string;
+    options?: string[];
 }
 
 export interface PromptTemplate {
